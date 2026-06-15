@@ -2,7 +2,7 @@ const express = require('express');
 const pool = require('../db/pool');
 const { authMiddleware, adminMiddleware } = require('../middleware/auth');
 const { sendPetMessage } = require('../services/messageService');
-const { checkAndSendReminders } = require('../jobs/agendaScheduler');
+const { checkAndSendReminders, checkPreferenceReminders, resetDailyStatuses } = require('../jobs/agendaScheduler');
 
 const router = express.Router();
 
@@ -68,12 +68,34 @@ router.get('/history/:petId', authMiddleware, async (req, res) => {
   }
 });
 
-// POST /api/messages/run-scheduler - Forzar ejecución del scheduler (admin)
+// POST /api/messages/run-scheduler - Forzar ejecución del scheduler de agenda (admin)
 router.post('/run-scheduler', adminMiddleware, async (req, res) => {
   try {
-    console.log('⚡ Scheduler ejecutado manualmente por admin');
+    console.log('⚡ Scheduler de agenda ejecutado manualmente por admin');
     await checkAndSendReminders();
-    res.json({ success: true, message: 'Scheduler ejecutado' });
+    res.json({ success: true, message: 'Scheduler de agenda ejecutado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/messages/run-preference-scheduler - Forzar revisión de preferencias (admin)
+router.post('/run-preference-scheduler', adminMiddleware, async (req, res) => {
+  try {
+    console.log('⚡ Scheduler de preferencias ejecutado manualmente por admin');
+    await checkPreferenceReminders();
+    res.json({ success: true, message: 'Scheduler de preferencias ejecutado' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// POST /api/messages/run-daily-reset - Forzar reset diario de estados (admin)
+router.post('/run-daily-reset', adminMiddleware, async (req, res) => {
+  try {
+    console.log('⚡ Reset diario ejecutado manualmente por admin');
+    await resetDailyStatuses();
+    res.json({ success: true, message: 'Reset diario ejecutado' });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }

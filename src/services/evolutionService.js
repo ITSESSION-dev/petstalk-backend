@@ -71,9 +71,43 @@ async function getQRCode() {
   return response.data;
 }
 
+/**
+ * Configura el webhook de la instancia para que Evolution API
+ * envíe los mensajes entrantes (messages.upsert) a nuestro backend.
+ * @param {string} webhookUrl - URL pública completa, ej: https://pets-api.sessian.tech/api/whatsapp/webhook
+ */
+async function setWebhook(webhookUrl) {
+  const payload = {
+    webhook: {
+      enabled: true,
+      url: webhookUrl,
+      webhookByEvents: false,
+      events: ['MESSAGES_UPSERT']
+    }
+  };
+
+  const response = await evolutionClient.post(
+    `/webhook/set/${EVOLUTION_INSTANCE}`,
+    payload
+  );
+  return response.data;
+}
+
+/**
+ * Obtiene la configuración actual del webhook de la instancia.
+ */
+async function getWebhook() {
+  const response = await evolutionClient.get(
+    `/webhook/find/${EVOLUTION_INSTANCE}`
+  );
+  return response.data;
+}
+
 module.exports = {
   sendWhatsAppMessage,
   checkInstanceStatus,
   createPetsTalkInstance,
-  getQRCode
+  getQRCode,
+  setWebhook,
+  getWebhook
 };
