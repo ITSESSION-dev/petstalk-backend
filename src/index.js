@@ -13,14 +13,15 @@ app.use(cors({
     : '*',
   credentials: true
 }));
-app.use(express.json());
+// Límite aumentado para permitir avatares en base64
+app.use(express.json({ limit: '5mb' }));
 
 // Health check
 app.get('/health', (req, res) => {
   res.json({
     status: 'ok',
     service: "Pet's Talk API",
-    version: '1.0.0',
+    version: '1.1.0',
     timestamp: new Date().toISOString()
   });
 });
